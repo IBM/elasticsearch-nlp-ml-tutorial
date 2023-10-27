@@ -1,0 +1,7 @@
+{
+    "query": {
+        "match": {
+            "tags.PER": "rishi sunak"
+        }
+    }
+}
