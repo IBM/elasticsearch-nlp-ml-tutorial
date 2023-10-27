@@ -1,0 +1,35 @@
+{
+    "description": "First pipeine",
+    "processors": [
+        {
+            "inference": {
+                "model_id": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+                "target_field": "ml.ner",
+                "field_map": {
+                    "alltext": "text_field"
+                }
+            }
+        },
+        {
+            "script": {
+                "lang": "painless",
+                "source": "Map tags = new HashMap(); for (item in ctx['ml']['ner']['entities']) { if (!tags.containsKey(item.class_name)) tags[item.class_name] = new HashSet(); tags[item.class_name].add(item.entity);} ctx['tags'] = tags;",
+                "if": "return ctx['ml']['ner'].containsKey('entities')"
+            }
+        }
+    ],
+    "on_failure": [
+        {
+            "set": {
+                "field": "_index",
+                "value": "failed-{{{ _index }}}"
+            }
+        },
+        {
+            "set": {
+                "field": "ingest.failure",
+                "value": "{{_ingest.on_failure_message}}"
+            }
+        }
+    ]
+}
